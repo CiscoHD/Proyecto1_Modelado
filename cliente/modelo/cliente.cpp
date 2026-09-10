@@ -15,7 +15,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-constexpr int PORT = 3490;
+constexpr int PORT = 8000;
 constexpr int BUFFER_SIZE = 1024;
 int main() {
     int sock = 0;
