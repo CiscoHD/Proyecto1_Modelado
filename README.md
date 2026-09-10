@@ -19,18 +19,18 @@ Se usa Meson como sistema de construcción.
 
 Para compilar, dentro de la raiz del proyecto ejecuta: 
 
-'''
+```
 $ meson setup build
 $ meson compile -C build
-'''
+```
 
 ## Ejecutar pruebas unitarias. 
 
 Dentro de la raiz del proyeto ejecuta: 
 
-'''
+```
 $ meson test -C build
-'''
+```
 
 # Servidor
 
