@@ -1,1 +1,6 @@
-executable('cliente', './modelo/cliente.cpp', install : false)
+executable(
+    'cliente',
+    './modelo/cliente.cpp',
+    dependencies : cjson_dep,
+    install : false
+)
