@@ -24,7 +24,7 @@
 #include <signal.h>
 
 
-#define PORT_DEFAULT 8000  // Puerto por defecto.
+#define PORT_DEFAULT 1234  // Puerto por defecto.
 #define BACKLOG 10         // Tamaño de la cola de conexiones. 
 
 int iniciar_conex(int puerto, int backlog, int debug);

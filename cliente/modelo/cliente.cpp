@@ -15,7 +15,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
-constexpr int PORT_DEFAULT = 8000;
+constexpr int PORT_DEFAULT = 1234;
 constexpr int BUFFER_SIZE = 1024;
 
 int main() {
@@ -27,23 +27,30 @@ int main() {
         std::cerr << "Socket creation error" << std::endl;
         return -1;
     }
+    
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(PORT_DEFAULT);
+
     // Convert IPv4 and IPv6 addresses from text to binary form
     if (inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0) {
         std::cerr << "Invalid address/ Address not supported" << std::endl;
         return -1;
     }
+
     // Connect to the server
     if (connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0) {
         std::cerr << "Connection Failed" << std::endl;
         return -1;
     }
-    std::string json_str = "{\"type\":\"IDENTIFY\"}";
-    send(sock, json_str.c_str(), json_str.size(), 0);
-    std::cout << "Cadena JSON enviada" << std::endl;
-    ssize_t valread = read(sock, buffer, BUFFER_SIZE);
-    std::cout << "Received: " << buffer << std::endl;
+
+    while(true) {
+      std::string json_str = "{\"type\":\"IDENTIFY\"}";
+      send(sock, json_str.c_str(), json_str.size(), 0);
+      std::cout << "Cadena JSON enviada" << std::endl;
+      ssize_t valread = read(sock, buffer, BUFFER_SIZE);
+      std::cout << "Received: " << buffer << std::endl;
+    }
+
     // Close the socket
     close(sock);
     return 0;

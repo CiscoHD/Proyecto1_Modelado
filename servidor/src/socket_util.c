@@ -8,14 +8,14 @@ int iniciar_conex(int puerto, int backlog, int debug) {
     fprintf(stderr, "ERROR: función socket(), codigo de error %s\n", strerror(sock_aux));
     return -1;
   } if (debug)
-      fprintf(stderr, "debug:: abrir_conexion() socket()=%d\t..........OK\n", sock_aux);
+      fprintf(stdout, "debug:: abrir_conexion() socket()=%d\t..........OK\n", sock_aux);
 
   int optval = 1;
   if (setsockopt(sock_aux, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0) {
     fprintf(stderr, "Error en función setsockopt()\n");
     return -1;
   } if (debug)
-      fprintf(stderr, "debug:: abrir_conexion() setsockopt()\t..........OK\n");
+      fprintf(stdout, "debug:: abrir_conexion() setsockopt()\t..........OK\n");
 
   if (puerto == 0)
     puerto = PORT_DEFAULT;
@@ -32,7 +32,7 @@ int iniciar_conex(int puerto, int backlog, int debug) {
     fprintf(stderr, "Error en función bind. Código de error %s\n", strerror(aux));
     return -1;
   } if (debug)
-      fprintf(stderr, "debug:: abrir_conexion() bind()\t\t..........OK\n");
+      fprintf(stdout, "debug:: abrir_conexion() bind()\t\t..........OK\n");
 
   /* Habilitamos el socket para recibir conexiones, con una cola de
      conexiones en espera que tendrá como máximo el tamaño
@@ -45,7 +45,7 @@ int iniciar_conex(int puerto, int backlog, int debug) {
     fprintf(stderr, "Error en función listen. Código de error %s\n", strerror(aux));
     return -1;
   } if (debug)
-      fprintf(stderr, "debug:: abrir_conexion() listen()\t..........OK\n");
+      fprintf(stdout, "debug:: abrir_conexion() listen()\t..........OK\n");
   
   return sock_aux;
 }
@@ -61,7 +61,7 @@ int aceptar_conex(int socket_fd, int debug) {
     return -1;
   }
   if (debug)
-    fprintf(stderr, "debug:: aceptar_pedidos() conexión desde: %s\n", inet_ntoa(their_addr.sin_addr));
+    fprintf(stdout, "debug:: aceptar_pedidos() conexión desde: %s\n", inet_ntoa(their_addr.sin_addr));
     
   return newfd;
 }
@@ -82,10 +82,10 @@ int conectar(char *hostname, int puerto, int debug) {
     perror("Error en creación de socket");
     exit(1);
   } if (debug)
-      fprintf(stderr, "debug:: conectar() socket()=%d\t\t..........OK\n", sockfd);
+      fprintf(stdout, "debug:: conectar() socket()=%d\t\t..........OK\n", sockfd);
 
   if (debug)
-    fprintf(stderr, "debug:: conectar() dst port()=%d\t..........OK\n", puerto);
+    fprintf(stdout, "debug:: conectar() dst port()=%d\t..........OK\n", puerto);
 
   puerto = (puerto == 0) ? htons(PORT_DEFAULT) : htons(puerto);
 
@@ -100,7 +100,7 @@ int conectar(char *hostname, int puerto, int debug) {
     perror("conectar():: error tratando de conectar al server");
     exit(1);
   } if (debug)
-      fprintf(stderr, "debug:: conectar() connect()\t\t..........OK\n");
+      fprintf(stdout, "debug:: conectar() connect()\t\t..........OK\n");
 
   return sockfd;
 }
