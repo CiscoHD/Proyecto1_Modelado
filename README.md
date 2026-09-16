@@ -34,4 +34,18 @@ $ meson test -C build
 
 # Servidor
 
+Para levantar el servidor, una vez compilado el proyecto, dentro de la
+raíz del mismo ejecuta: 
+
+```
+$ ./build/servidor/servidor <número_de_puerto>
+```
+
 # Cliente
+
+Para levantar un cliente, una vez compilado el proyecto, dentro de la
+raíz del mismo ejecuta: 
+
+```
+$ ./build/cliente/cliente 
+```
