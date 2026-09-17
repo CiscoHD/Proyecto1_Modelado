@@ -1,7 +1,51 @@
 #include <cjson/cJSON.h>
+#include <glib.h>
 #include "include/socket_util.h"
 
 #define BUFFER_SIZE 1048576
+
+gpointer entrada_hilo(gpointer datos) {
+  int sockfd_h;                          /*Socket file descriptor en el hilo*/
+  sockfd_h = *(int *)datos;
+  g_free(datos);
+
+  char resp[] = "{\"type\": \"RESPONSE\"}";
+  char buffer[BUFFER_SIZE];
+
+  printf("[Hilo: %p] Conexión con cliente %d\n", g_thread_self(), sockfd_h);
+
+  while(1) {
+    memset(buffer, 0, sizeof(buffer));
+    ssize_t valread = read(sockfd_h, buffer, sizeof(buffer) - 1);
+    
+    if(valread <= 0) {
+      printf("[Hilo: %p] ERROR: No se puede leer del cliente %d.\n", g_thread_self(), sockfd_h);
+      break;
+    }
+
+    buffer[valread] = '\0';
+    
+    cJSON *json = cJSON_Parse(buffer);
+    if (json == NULL) {
+      const char *error_ptr = cJSON_GetErrorPtr();
+      if (error_ptr != NULL) {
+        printf("Error: %s\n", error_ptr);
+      }
+      cJSON_Delete(json);
+      continue;
+    }
+    
+    cJSON *type = cJSON_GetObjectItemCaseSensitive(json, "type");
+    if (cJSON_IsString(type) && (type->valuestring != NULL)) {
+      printf("[Hilo: %p]Tipo operación: %s\n", g_thread_self(), type->valuestring);
+      write(sockfd_h, resp, strlen(resp));
+    }
+    
+    cJSON_Delete(json);
+  }
+  close(sockfd_h);
+  return NULL;
+}
 
 int main(int argc, char *argv[]) {
 
@@ -10,52 +54,33 @@ int main(int argc, char *argv[]) {
     return 1;
   }
     
-  int sock, sockdup, puerto = atoi(argv[1]);
-  char resp[] = "{\"type\": \"RESPONSE\"}";
-  char buffer[BUFFER_SIZE];
-  
+  int sockfd;
+  int sockfd_usr;
+  int puerto = atoi(argv[1]);
+
   if(puerto <= 1024) {
     printf("Puerto inválido, se usará el puerto por defecto (1234)\n");
     puerto = 0;
   }
   
-  sock = iniciar_conex(puerto, 10, 1);
+  sockfd = iniciar_conex(puerto, 10, 1);
 
   while(1) {
-    if((sockdup = aceptar_conex(sock, 1)) < 0)
+    if((sockfd_usr = aceptar_conex(sockfd, 1)) < 0)
       continue;
 
-    while(1) {
-      memset(buffer, 0, sizeof(buffer));
-      ssize_t valread = read(sockdup, buffer, sizeof(buffer) - 1);
-      if(valread <= 0) {
-        printf("ERROR: No se puede leer del cliente.\n");
-        break;
-      }
+    /*Por cada cliente que se conecte, vamos a guardar un apuntador a
+      sockfd_usr para poder pasarlos a g_thread_new()_*/
+    int *psockfd_usr = g_malloc(sizeof(int));
+    *psockfd_usr = sockfd_usr;
 
-      buffer[valread] = '\0';
-
-      cJSON *json = cJSON_Parse(buffer);
-      if (json == NULL) {
-        const char *error_ptr = cJSON_GetErrorPtr();
-        if (error_ptr != NULL) {
-          printf("Error: %s\n", error_ptr);
-        }
-        cJSON_Delete(json);
-        continue;
-      }
-
-      cJSON *type = cJSON_GetObjectItemCaseSensitive(json, "type");
-      if (cJSON_IsString(type) && (type->valuestring != NULL)) {
-        printf("Tipo operación: %s\n", type->valuestring);
-      }
+    /*Se crea un hilo para atender (con la función entrada_hilo) al
+      nuevo cliente*/
+    GThread *hilo = g_thread_new("usuario", entrada_hilo, psockfd_usr);
     
-      cJSON_Delete(json);
-      write(sockdup, resp, strlen(resp));
-    }
-
-    close(sockdup);
+    g_thread_unref(hilo);
   }
-  close(sock);
+  
+  close(sockfd);
   return 0;
 }
