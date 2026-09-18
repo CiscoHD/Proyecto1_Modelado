@@ -1,6 +1,10 @@
 inc_dir = include_directories('./include')
 
-src = ['./src/servidor.c', './src/socket_util.c']
+src = [
+    './src/servidor.c',
+    './src/socket_util.c',
+    './src/parser.c'
+]
 
 executable('servidor',
     sources : src,

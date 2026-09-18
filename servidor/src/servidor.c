@@ -1,6 +1,7 @@
 #include <cjson/cJSON.h>
 #include <glib.h>
 #include "include/socket_util.h"
+#include "include/parser.h"
 
 #define BUFFER_SIZE 1048576
 
@@ -19,7 +20,7 @@ gpointer entrada_hilo(gpointer datos) {
     ssize_t valread = read(sockfd_h, buffer, sizeof(buffer) - 1);
     
     if(valread <= 0) {
-      printf("[Hilo: %p] ERROR: No se puede leer del cliente %d.\n", g_thread_self(), sockfd_h);
+      printf("[Hilo: %p] ERROR: El cliente %d se ha desconectado.\n", g_thread_self(), sockfd_h);
       break;
     }
 
@@ -29,7 +30,7 @@ gpointer entrada_hilo(gpointer datos) {
     if (json == NULL) {
       const char *error_ptr = cJSON_GetErrorPtr();
       if (error_ptr != NULL) {
-        printf("Error: %s\n", error_ptr);
+        printf("Error: %s no es una cadena en formato JSON\n", error_ptr);
       }
       cJSON_Delete(json);
       continue;
@@ -37,7 +38,11 @@ gpointer entrada_hilo(gpointer datos) {
     
     cJSON *type = cJSON_GetObjectItemCaseSensitive(json, "type");
     if (cJSON_IsString(type) && (type->valuestring != NULL)) {
-      printf("[Hilo: %p]Tipo operación: %s\n", g_thread_self(), type->valuestring);
+      TipoMsj op = tipo_mensaje(type->valuestring);
+      if(op < 0) {
+        printf("ERROR: %s no es una operación válida\n", type->valuestring);
+      }
+      printf("[Hilo: %p]Tipo operación: %s, constante %d\n", g_thread_self(), type->valuestring, op);
       write(sockfd_h, resp, strlen(resp));
     }
     
