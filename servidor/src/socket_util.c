@@ -97,10 +97,34 @@ int conectar(char *hostname, int puerto, int debug) {
 
   /* Intentamos conectarnos con el servidor */
   if (connect(sockfd, (struct sockaddr *)&their_addr, sizeof(struct sockaddr)) == -1) {
-    perror("conectar():: error tratando de conectar al server");
+    perror("conectar():: error tratando de conectar al server\n");
     exit(1);
   } if (debug)
       fprintf(stdout, "debug:: conectar() connect()\t\t..........OK\n");
 
   return sockfd;
+}
+
+int enviar_resp(int sockfd, cJSON *json, int debug) {
+  if(json == NULL) {
+    perror("enviar_resp():: error json inexistente\n");
+    return -1;
+  }
+
+  char *json_resp = cJSON_PrintUnformatted(json);
+  if(json_resp == NULL) {
+    perror("enviar_resp():: error al crear la respuesta\n");
+    cJSON_Delete(json);
+    return -1;
+  }
+
+  write(sockfd, json_resp, strlen(json_resp));
+  write(sockfd, "\n", 1);
+  if(debug == 1)
+    printf("debug:: enviar_resp() se envió %s al cliente %d\n", json_resp, sockfd);
+ 
+  cJSON_free(json_resp);
+  cJSON_Delete(json);
+  
+  return 1; 
 }
