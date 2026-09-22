@@ -49,6 +49,8 @@ int main() {
       std::cout << "Cadena JSON enviada" << std::endl;
       ssize_t valread = read(sock, buffer, BUFFER_SIZE);
       std::cout << "Received: " << buffer << std::endl;
+
+      sleep(2);
     }
 
     // Close the socket
