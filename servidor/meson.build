@@ -3,7 +3,9 @@ inc_dir = include_directories('./include')
 src = [
     './src/servidor.c',
     './src/socket_util.c',
-    './src/parser.c'
+    './src/protocolo.c',
+    './src/distribuidor.c',
+    './src/manejador.c'
 ]
 
 executable('servidor',

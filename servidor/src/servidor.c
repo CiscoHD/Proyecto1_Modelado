@@ -1,21 +1,21 @@
 #include <cjson/cJSON.h>
 #include <glib.h>
 #include "include/socket_util.h"
-#include "include/parser.h"
+#include "include/distribuidor.h"
 
 #define BUFFER_SIZE 1048576
 
 gpointer entrada_hilo(gpointer datos) {
   int sockfd_h;                          /*Socket file descriptor en el hilo*/
+  int codigo_error = 0;
   sockfd_h = *(int *)datos;
   g_free(datos);
 
-  char resp[] = "{\"type\": \"RESPONSE\"}";
   char buffer[BUFFER_SIZE];
 
   printf("[Hilo: %p] Conexión con cliente %d\n", g_thread_self(), sockfd_h);
 
-  while(1) {
+  while(codigo_error != 1) {
     memset(buffer, 0, sizeof(buffer));
     ssize_t valread = read(sockfd_h, buffer, sizeof(buffer) - 1);
     
@@ -27,24 +27,8 @@ gpointer entrada_hilo(gpointer datos) {
     buffer[valread] = '\0';
     
     cJSON *json = cJSON_Parse(buffer);
-    if (json == NULL) {
-      const char *error_ptr = cJSON_GetErrorPtr();
-      if (error_ptr != NULL) {
-        printf("Error: %s no es una cadena en formato JSON\n", error_ptr);
-      }
-      cJSON_Delete(json);
-      continue;
-    }
     
-    cJSON *type = cJSON_GetObjectItemCaseSensitive(json, "type");
-    if (cJSON_IsString(type) && (type->valuestring != NULL)) {
-      TipoMsj op = tipo_mensaje(type->valuestring);
-      if(op < 0) {
-        printf("ERROR: %s no es una operación válida\n", type->valuestring);
-      }
-      printf("[Hilo: %p]Tipo operación: %s, constante %d\n", g_thread_self(), type->valuestring, op);
-      write(sockfd_h, resp, strlen(resp));
-    }
+    codigo_error = distribuidor_peticiones(sockfd_h, json);
     
     cJSON_Delete(json);
   }
