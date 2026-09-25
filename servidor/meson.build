@@ -5,7 +5,8 @@ src = [
     './src/socket_util.c',
     './src/protocolo.c',
     './src/distribuidor.c',
-    './src/manejador.c'
+    './src/manejador.c',
+    './src/estructuras.c'
 ]
 
 executable('servidor',
