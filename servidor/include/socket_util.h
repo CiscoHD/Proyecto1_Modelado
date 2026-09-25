@@ -34,5 +34,4 @@ int terminar_conex(int socket_fd, int debug);
 
 int conectar(char *hostname, int puerto, int debug);
 
-int enviar_resp(int socket_fd, cJSON *json, int debug);
-
+int enviar_resp(int socket_fd, cJSON *json, int liberarJSON);
