@@ -66,7 +66,7 @@ void imprimir_mensaje(VentanaGral *v, const char *tipo, const char *usr, const c
     wprintw(v->v_msjs, "%s : ", usr);
   }
 
-  wprintw(v->v_msjs, "%s", msj);
+  wprintw(v->v_msjs, "%s\n", msj);
 
   wrefresh(v->v_msjs);
   
