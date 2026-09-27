@@ -15,5 +15,5 @@ glib_dep = dependency(
 )
 
 subdir('servidor')
-subdir('cliente')
+#subdir('cliente')
 subdir('test')

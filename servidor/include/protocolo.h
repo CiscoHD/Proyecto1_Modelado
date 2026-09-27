@@ -27,6 +27,7 @@ typedef enum {
 } TipoEntrada;
 
 typedef enum {
+  TIPO_VACIO,
   IDENTIFY_O,      /*Destinado para campo "operation":"IDENTIFY"*/
   INVITATION,
   INVITE_O,
@@ -41,7 +42,7 @@ typedef enum {
   
   USER_LIST,
   ROOM_USERS_O,
-  ROOM_USERS_LIST,
+  ROOM_USER_LIST,
   
   TEXT_O,
   TEXT_FROM,
@@ -57,6 +58,7 @@ typedef enum {
 } TipoResp;
 
 typedef enum {
+  RESULT_VACIO,
   SUCCESS,
   USER_ALREADY_EXISTS,
   NO_SUCH_USER,
@@ -64,13 +66,14 @@ typedef enum {
   NO_SUCH_ROOM,
   NOT_INVITED,
   NOT_JOINED,
-
+  NOT_IDENTIFIED,
   INVALID,
 
   TOTAL_TIPOS_RESUL
 } TipoResul;
 
 typedef enum {
+  ESTADO_VACIO,
   ACTIVE,
   AWAY,
   BUSY,
@@ -105,9 +108,7 @@ typedef struct {
                            respuesta*/
   const char *text;      /*Texto de que un usuario envía a otro(s)*/
   const char *roomname;  /*Nombre de una sala*/
-  const char *users;     /*Diccionario de usuarios en servidor*/
-  const char *usernames; /*Lista de usuarios a invitar*/
-
+  cJSON      *users;     /*Diccionario de usuarios en servidor*/
   TipoResp   type;       /*Tipo de respuesta que se envía a un
                            cliente*/
   TipoResp   operation;  /*Tipo de operación a la que se responde*/

@@ -105,7 +105,7 @@ int conectar(char *hostname, int puerto, int debug) {
   return sockfd;
 }
 
-int enviar_resp(int sockfd, cJSON *json, int debug) {
+int enviar_resp(int sockfd, cJSON *json, int liberarJSON) {
   if(json == NULL) {
     perror("enviar_resp():: error json inexistente\n");
     return -1;
@@ -118,13 +118,29 @@ int enviar_resp(int sockfd, cJSON *json, int debug) {
     return -1;
   }
 
-  write(sockfd, json_resp, strlen(json_resp));
-  write(sockfd, "\n", 1);
-  if(debug == 1)
-    printf("debug:: enviar_resp() se envió %s al cliente %d\n", json_resp, sockfd);
- 
+  ssize_t bytes_sent = send(sockfd, json_resp, strlen(json_resp), MSG_NOSIGNAL);
+  if (bytes_sent <= 0) {
+    printf("enviar_resp():: Cliente %d ha desconectado \n", sockfd);
+    cJSON_free(json_resp);
+    if (liberarJSON == 1)
+      cJSON_Delete(json);
+    return -1; 
+  }
+
+  bytes_sent = send(sockfd, "\n", 1, MSG_NOSIGNAL);
+  if (bytes_sent <= 0) {
+    printf("enviar_resp():: Cliente %d se ha desconectado. \n", sockfd);
+    cJSON_free(json_resp);
+    if (liberarJSON == 1)
+      cJSON_Delete(json);
+    return -1;
+  }
+    
+  printf("debug:: enviar_resp() se envió %s al cliente %d\n", json_resp, sockfd);
+
   cJSON_free(json_resp);
-  cJSON_Delete(json);
+  if(liberarJSON == 1)
+    cJSON_Delete(json);
   
   return 1; 
 }

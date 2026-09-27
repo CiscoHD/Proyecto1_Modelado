@@ -6,6 +6,6 @@
 #include "protocolo.h"
 #include "manejador.h"
 
-int distribuidor_peticiones(int sockfd, const cJSON *json_msj);
+int distribuidor_peticiones(int sockfd, const cJSON *json_msj, ContextoServidor *cs);
 
 #endif 

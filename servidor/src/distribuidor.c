@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int distribuidor_peticiones(int sockfd, const cJSON *json_msj) {
+int distribuidor_peticiones(int sockfd, const cJSON *json_msj, ContextoServidor *cs) {
 
   if(json_msj == NULL) {
     const char *error_ptr = cJSON_GetErrorPtr();
@@ -31,40 +31,40 @@ int distribuidor_peticiones(int sockfd, const cJSON *json_msj) {
 
   switch(tipo) {
   case IDENTIFY:
-    return manejar_identify(sockfd, json_msj);
+    return manejar_identify(sockfd, json_msj, cs);
 
   case STATUS:
-    return manejar_status(sockfd, json_msj);
+    return manejar_status(sockfd, json_msj, cs);
     
   case USERS:
-    return manejar_users(sockfd, json_msj);
+    return manejar_users(sockfd, json_msj, cs);
     
   case ROOM_USERS:
-    return manejar_room_users(sockfd, json_msj);
+    return manejar_room_users(sockfd, json_msj, cs);
     
   case TEXT:
-    return manejar_text(sockfd, json_msj);
+    return manejar_text(sockfd, json_msj, cs);
     
   case PUBLIC_TEXT:
-    return manejar_public_text(sockfd, json_msj);
+    return manejar_public_text(sockfd, json_msj, cs);
     
   case ROOM_TEXT:
-    return manejar_room_text(sockfd, json_msj);
+    return manejar_room_text(sockfd, json_msj, cs);
     
   case NEW_ROOM:
-    return manejar_new_room(sockfd, json_msj);
+    return manejar_new_room(sockfd, json_msj, cs);
     
   case INVITE:
-    return manejar_invite(sockfd, json_msj);
+    return manejar_invite(sockfd, json_msj, cs);
     
   case JOIN_ROOM:
-    return manejar_join_room(sockfd, json_msj);
+    return manejar_join_room(sockfd, json_msj, cs);
     
   case LEAVE_ROOM:
-    return manejar_leave_room(sockfd, json_msj);
+    return manejar_leave_room(sockfd, json_msj, cs);
 
   case DISCONNECT:
-    return manejar_disconnect(sockfd, json_msj);
+    return manejar_disconnect(sockfd, cs);
 
   default:
     printf("distribuidor_peticiones(): Entra caso default\n");

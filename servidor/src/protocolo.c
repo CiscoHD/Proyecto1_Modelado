@@ -16,6 +16,7 @@ const MapeoEntrada TABLA_ENTRADAS[TOTAL_TIPOS_E] = {
 };
 
 const MapeoRespuestas TABLA_RESP[TOTAL_TIPOS_RESP] = {
+  {"", TIPO_VACIO},
   {"IDENTIFY", IDENTIFY_O},
   {"INVITATION", INVITATION},
   {"INVITE", INVITE_O},
@@ -29,7 +30,7 @@ const MapeoRespuestas TABLA_RESP[TOTAL_TIPOS_RESP] = {
   {"DISCONNECTED", DISCONNECTED},
   {"USER_LIST", USER_LIST},
   {"ROOM_USERS", ROOM_USERS_O},
-  {"ROOM_USERS_LIST", ROOM_USERS_LIST},
+  {"ROOM_USER_LIST", ROOM_USER_LIST},
   {"TEXT", TEXT_O},
   {"TEXT_FROM", TEXT_FROM},
   {"PUBLIC_TEXT", PUBLIC_TEXT_O},
@@ -41,6 +42,7 @@ const MapeoRespuestas TABLA_RESP[TOTAL_TIPOS_RESP] = {
 };
 
 const MapeoResultados TABLA_RESUL[TOTAL_TIPOS_RESUL] = {
+  {"", RESULT_VACIO},
   {"SUCCESS", SUCCESS},
   {"USER_ALREADY_EXISTS", USER_ALREADY_EXISTS},
   {"NO_SUCH_USER", NO_SUCH_USER},
@@ -48,7 +50,15 @@ const MapeoResultados TABLA_RESUL[TOTAL_TIPOS_RESUL] = {
   {"NO_SUCH_ROOM", NO_SUCH_ROOM},
   {"NOT_INVITED", NOT_INVITED},
   {"NOT_JOINED", NOT_JOINED},
+  {"NOT_IDENTIFIED", NOT_IDENTIFIED},
   {"INVALID", INVALID}
+};
+
+const MapeoEstados TABLA_ESTADOS[TOTAL_ESTADOS] = {
+  {"ESTADO_VACIO", ESTADO_VACIO},
+  {"ACTIVE", ACTIVE},
+  {"AWAY", AWAY},
+  {"BUSY", BUSY},
 };
 
 TipoEntrada tipo_mensaje(const char *mensaje) {
@@ -69,17 +79,24 @@ cJSON *fabrica_respuesta(TipoResp tipo, const Campos *c) {
   cJSON *json = cJSON_CreateObject();
   // Campos c = (datos != NULL) ? datos : (Campos){0};
 
-  switch(tipo){
-  case RESPONSE:
-    cJSON_AddStringToObject(json, "type", TABLA_RESP[RESPONSE].cad_tipo);
+  cJSON_AddStringToObject(json, "type", TABLA_RESP[tipo].cad_tipo);
+  if(c->operation != TIPO_VACIO)
     cJSON_AddStringToObject(json, "operation", TABLA_RESP[c->operation].cad_tipo);
+  if(c->result != RESULT_VACIO)
     cJSON_AddStringToObject(json, "result", TABLA_RESUL[c->result].cad_tipo);
-    if(c->extra != NULL) 
-      cJSON_AddStringToObject(json, "extra", c->extra);
-    break;
-  case NEW_USER:
-    break;
-  }
+  if(c->status != ESTADO_VACIO)
+    cJSON_AddStringToObject(json, "status", TABLA_RESUL[c->status].cad_tipo);
+  if(c->username != NULL)
+    cJSON_AddStringToObject(json, "username", c->username);
+  if(c->text != NULL)
+    cJSON_AddStringToObject(json, "text", c->text);
+  if(c->roomname != NULL)
+    cJSON_AddStringToObject(json, "roomname", c->roomname);
+  if(c->users != NULL)
+    cJSON_AddItemToObject(json, "users", c->users);
+  if(c->extra != NULL) 
+    cJSON_AddStringToObject(json, "extra", c->extra);
+
   return json;
 }
 
