@@ -652,7 +652,7 @@ int manejar_join_room(int sockfd, const cJSON *json_msj, ContextoServidor *cs) {
     g_mutex_unlock(&cs->mtx_serv);
     printf("manejar_join_room(): No existe la sala '%s'\n", nom_sala);
     cJSON *resp_err = fabrica_respuesta(RESPONSE, &(Campos) {
-        .operation = INVITE_O,
+        .operation = JOIN_ROOM_O,
         .result = NO_SUCH_ROOM,
         .extra = nom_sala
       });
@@ -740,7 +740,7 @@ int manejar_leave_room(int sockfd, const cJSON *json_msj, ContextoServidor *cs) 
     g_mutex_unlock(&cs->mtx_serv);
     printf("manejar_leave_room(): No existe la sala '%s'\n", nom_sala);
     cJSON *resp_err = fabrica_respuesta(RESPONSE, &(Campos) {
-        .operation = INVITE_O,
+        .operation = LEAVE_ROOM_O,
         .result = NO_SUCH_ROOM,
         .extra = nom_sala
       });
