@@ -1,6 +1,6 @@
 executable(
     'cliente',
-    './modelo/cliente.cpp',
+    './vista/cliente.c',
     dependencies : cjson_dep,
     install : false
 )
