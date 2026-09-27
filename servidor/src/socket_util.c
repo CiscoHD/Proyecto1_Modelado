@@ -66,45 +66,6 @@ int aceptar_conex(int socket_fd, int debug) {
   return newfd;
 }
 
-int conectar(char *hostname, int puerto, int debug) {
-  int sockfd;
-  struct hostent *he;	  	     /* Se utiliza para convertir el nombre del host a su dirección IP */
-  struct sockaddr_in their_addr; /* dirección del server donde se conectará */
-
-  // convertimos el nombre del host a su dirección IP
-  if ((he = gethostbyname(hostname)) == NULL) {
-    herror("Error en Nombre de Host");
-    exit(1);
-  }
-
-  /* Creamos el socket */
-  if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)	{
-    perror("Error en creación de socket");
-    exit(1);
-  } if (debug)
-      fprintf(stdout, "debug:: conectar() socket()=%d\t\t..........OK\n", sockfd);
-
-  if (debug)
-    fprintf(stdout, "debug:: conectar() dst port()=%d\t..........OK\n", puerto);
-
-  puerto = (puerto == 0) ? htons(PORT_DEFAULT) : htons(puerto);
-
-  /* Establecemos their_addr con la direccion del server */
-  their_addr.sin_family = AF_INET;
-  their_addr.sin_port = puerto;
-  their_addr.sin_addr = *((struct in_addr *)he->h_addr);
-  bzero(&(their_addr.sin_zero), 8);
-
-  /* Intentamos conectarnos con el servidor */
-  if (connect(sockfd, (struct sockaddr *)&their_addr, sizeof(struct sockaddr)) == -1) {
-    perror("conectar():: error tratando de conectar al server\n");
-    exit(1);
-  } if (debug)
-      fprintf(stdout, "debug:: conectar() connect()\t\t..........OK\n");
-
-  return sockfd;
-}
-
 int enviar_resp(int sockfd, cJSON *json, int liberarJSON) {
   if(json == NULL) {
     perror("enviar_resp():: error json inexistente\n");
