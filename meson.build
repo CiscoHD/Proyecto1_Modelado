@@ -1,4 +1,4 @@
-project('proyecto1_chat', ['c', 'cpp'])
+project('proyecto1_chat', ['c'])
 
 unity_dep = dependency(
     'unity',
@@ -15,5 +15,5 @@ glib_dep = dependency(
 )
 
 subdir('servidor')
-#subdir('cliente')
-subdir('test')
+subdir('cliente')
+
