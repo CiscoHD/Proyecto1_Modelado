@@ -23,8 +23,13 @@ src_controlador = [
 
 executable(
     'cliente',
-    sources : [src, src_modelo, src_vista, src_controlador],
-    dependencies : cjson_dep,
+    sources : [
+        src,
+        src_modelo,
+        src_vista,
+        src_controlador,
+    ],
+    dependencies : [cjson_dep, glib_dep, ncurses_dep, sds_dep],
     include_directories: inc_dir,
     install : false
 )

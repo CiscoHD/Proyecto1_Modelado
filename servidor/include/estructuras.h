@@ -24,8 +24,7 @@ typedef struct {
 
 typedef struct {
   GHashTable *salas;        /*K:"nombre_sala", V:Sala*/
-  //GMutex mtx_salas;
-} ContextoSalas;
+  } ContextoSalas;
 
 typedef struct {
   SalaGeneral *sala_gral;

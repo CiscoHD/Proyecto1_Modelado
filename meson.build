@@ -14,6 +14,15 @@ glib_dep = dependency(
     'glib-2.0'
 )
 
+ncurses_dep = dependency(
+    'ncurses'
+)
+
+sds_dep = dependency(
+    'sds',
+    fallback: ['sds', 'sds_dep']
+)
+
 subdir('servidor')
 subdir('cliente')
 
