@@ -74,7 +74,6 @@ int main(int argc, char *argv[]) {
     /*Se crea un hilo para atender (con la función entrada_hilo) al
       nuevo cliente*/
     GThread *hilo = g_thread_new("usuario", entrada_hilo, datos);
-
         
     g_thread_unref(hilo);
   }
