@@ -174,9 +174,9 @@
       servidor y viceversa.
     \end{enumerate}
     
-    El primer componente al ser una pieza enfocada a la comodidad del
-    usuario, se debe crear un lenguaje de comandos simples que ayuden
-    a determinar rápidamente la operación a realizar. Además, el cómo
+    El primer componente, al ser una pieza enfocada a la comodidad del
+    usuario, debe tener un lenguaje de comandos simples que ayuden a
+    determinar rápidamente la operación a realizar. Además, el cómo
     presentamos las diferentes notificaciones que el servidor envía
     debe ser claro para quienes estén dirigidas. Exploraremos en el
     diseño la manera de hacer que esto ocurra.
@@ -220,31 +220,51 @@
     
     \subsection{Diseño del servidor}
 
-    Con base en las necesidades descritas en el análisis, dividimos el
-    servidor en capas.
+    Podemos agrupar las necesidades del servidor, previamente
+    analizadas, en 'capas'. La Figura \ref{fig:div_serv} ofrece una
+    representación visual de dicha división.
 
-    La primera, que llamaremos \textbf{Capa de Comunicación}, se
-    encarga de todo lo relativo a la conexión y comunicación con
+    \subsubsection{Capa de Comunicación}
+
+    Se encarga de todo lo relativo a la conexión y comunicación con
     clientes asi como a la interpretación y estructuración de mensajes
     que siguen la especificación del protocolo.
 
-    Luego, la que denominamos \textbf{Capa de Operaciones}, es la
-    responsable de dirigir el flujo de trabajo del servidor, dictando
-    qué operaciones se realizan y en qué momento. Desde establecer el
-    envío de mensajes hasta la modificación de los registros de los
-    clientes.
+    \subsubsection{Capa de Operaciones}
+    
+    Es la responsable de dirigir el flujo de trabajo del servidor,
+    determinando las operaciones que se realizan y la modificación de
+    los registros de los clientes. Además debe manejar, junto con la
+    \textit{capa de comunicación}, el envío de mensajes.
 
-    Por último, tenemos la \textbf{Capa de Almacenamiento}, en ella se
-    encuentran toda las estructuras que guardan la información
-    relativa a los clientes. Se establece la manera es que se crean
-    dichas estrcuturas y su correcta eliminación.
+    \subsubsection{Capa de Almacenamiento}
+    
+    En ella se encuentran toda las estructuras que guardan la
+    información relativa a los clientes. Aquí se establece la manera
+    es que se crean y eliminan dichas estructuras.
+
+    \begin{figure}[htbp]
+		\centering
+        \includesvg[width=0.5\textwidth]{img/div_serv.svg}
+		\caption{Diagrama de la división del servidor.}
+		\label{fig:div_serv}
+	\end{figure}
 
     \subsection{Diseño del Cliente}
 
     Como advertimos en el análisis, la división del cliente resulta
-    fácil hacerla en tres partes. En el desarrollo de software existe
-    un patrón de diseño pensado para  
+    fácil hacerla en tres partes.
 
+    En el desarrollo de software existe el patrón de diseño
+    modelo-vista-controlador, pensado para separar la información que
+    maneja el sistema del cómo se le presenta al usuario y cómo
+    interactuan. El \textbf{Modelo} es la información que maneja el
+    sistema. La \textbf{Vista} es la manera en que se presenta la
+    información al usuario. Por su parte el \textbf{Controlador} es la
+    forma en que interactuan la \textit{vista} y el
+    \textit{modelo}. \cite{Becerril}.
+
+    
 	\section{Implementación}
 
     \section{Conclusión}
