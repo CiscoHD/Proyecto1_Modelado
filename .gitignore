@@ -1,5 +1,13 @@
 build/
+reporte/auto/
 
 subprojects/
 !subprojects/*.wrap
+
+*.aux
+*.bcf
+*.log
+*.out
+*.run.xml
+
 
