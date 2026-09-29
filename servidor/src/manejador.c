@@ -67,6 +67,35 @@ int manejar_identify(int sockfd, const cJSON *json_msj, ContextoServidor *cs) {
 
 int manejar_status(int sockfd, const cJSON *json_msj, ContextoServidor *cs) {
 
+  const cJSON *status = cJSON_GetObjectItemCaseSensitive(json_msj, "status");
+  if(!(cJSON_IsString(status)) || (status == NULL)) {
+    printf("manejar_status(): campo 'status' ausente o inválido\n");
+    cJSON *resp_err = fabrica_respuesta(RESPONSE, &(Campos) {
+        .operation = INVALID_O,
+        .result = INVALID,
+      });
+    enviar_resp(sockfd, resp_err, 1);
+    return 1;
+  }
+
+  Estado n_status = 0; 
+  if(strcmp(status->valuestring, "ACTIVE") == 0) {
+    n_status = ACTIVE;
+  } else if(strcmp(status->valuestring, "AWAY") == 0) {
+    n_status = AWAY;
+  } else if(strcmp(status->valuestring, "BUSY") == 0) {
+    n_status = BUSY;
+  }
+
+  if(n_status == 0) {
+    printf("manejar_status(): Estado inválido \n");
+    cJSON *resp_err = fabrica_respuesta(RESPONSE, &(Campos) {
+        .operation = INVALID_O,
+        .result = INVALID
+      });
+    enviar_resp(sockfd, resp_err, 1);
+  }
+  
   g_mutex_lock(&cs->mtx_serv);
 
   Cliente *cliente = g_hash_table_lookup(cs->sala_gral->usrs, GINT_TO_POINTER(sockfd));
@@ -80,6 +109,26 @@ int manejar_status(int sockfd, const cJSON *json_msj, ContextoServidor *cs) {
     enviar_resp(sockfd, resp_err, 1);
     return 1;
   }
+
+  cliente->status = n_status;
+  
+  cJSON *new_status = fabrica_respuesta(NEW_STATUS, &(Campos) {
+      .username = cliente->username,
+      .status = n_status
+    });
+  
+  GHashTableIter it;
+  gpointer i_sockfd;
+  g_hash_table_iter_init(&it, cs->sala_gral->usrs);
+
+  while(g_hash_table_iter_next(&it, &i_sockfd, NULL)) {
+    int sockfd_dst = GPOINTER_TO_INT(i_sockfd);
+    if(sockfd_dst == sockfd) 
+      continue;
+    enviar_resp(sockfd_dst, new_status, 0);
+  }
+
+  cJSON_Delete(new_status);
   
   g_mutex_unlock(&cs->mtx_serv);
   
