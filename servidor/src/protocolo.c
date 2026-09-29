@@ -85,7 +85,7 @@ cJSON *fabrica_respuesta(TipoResp tipo, const Campos *c) {
   if(c->result != RESULT_VACIO)
     cJSON_AddStringToObject(json, "result", TABLA_RESUL[c->result].cad_tipo);
   if(c->status != ESTADO_VACIO)
-    cJSON_AddStringToObject(json, "status", TABLA_RESUL[c->status].cad_tipo);
+    cJSON_AddStringToObject(json, "status", TABLA_ESTADOS[c->status].cad_tipo);
   if(c->username != NULL)
     cJSON_AddStringToObject(json, "username", c->username);
   if(c->text != NULL)
