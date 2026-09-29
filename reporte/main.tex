@@ -230,6 +230,23 @@
     clientes asi como a la interpretación y estructuración de mensajes
     que siguen la especificación del protocolo.
 
+    Notamos entonces que podemos dividir la capa en dos componentes.
+
+    El primero siendo aquel que sabe establecer una conexión con un
+    cliente. La conexión consta, a su vez, de dos partes: se debe
+    identficar a un cliente para comunicarse con él y se debe poder
+    enviar/recibir información por medio de la conexión. 
+
+    Como no podemos recibir cualquier mensaje, el segundo componente
+    deberá ser capaz de determinar si un mensaje está bien formado,
+    esto es, que contenga el formato especificado en el protocolo
+    aunque, como la capa de comunicación no se comunica directamente
+    con la de almacenamiento, es imposible determinar si un mensaje es
+    realizable pero sí podemos determinar qué tipo de petición estamos
+    recibiendo. Al seguir en la capa más próxima a la interacción con
+    el cliente, nos conviene que el componente también sea capaz de
+    estructurar los mensajes de notificación.
+
     \subsubsection{Capa de Operaciones}
     
     Es la responsable de dirigir el flujo de trabajo del servidor,
@@ -237,11 +254,64 @@
     los registros de los clientes. Además debe manejar, junto con la
     \textit{capa de comunicación}, el envío de mensajes.
 
+    Sobre las operaciones a realizar, notamos que podemos tener un
+    punto de entrada sobre el cual, una petición verificada por la
+    \textit{capa de comunicación}, se distribuye dependiendo el tipo
+    de la misma o se determina como inválida dentro de los límites del
+    protocolo.
+
+    Como se mencionaba en el análisis, todas las peticiones necesitan,
+    en mayor o menor medida, de la información de la \textit{capa de
+      almacenamiento} para poder realizarse.
+
+    Dado que tenemos el problema de varias tareas realizándose a la
+    vez, podemos tener problemas inesperedados de modificación y
+    lectura sobre los datos que se comparten entre las distintas
+    tareas. Una forma de solucionar dicho problema es cada que una
+    tarea quiere acceder o modificar la información compartida tenga
+    una manera de saber si alguna otra lo está haciendo en primer
+    lugar y entonces esperar a que el recurso sea `liberado`. A esta
+    técnica se le conoce como \textit{exclusión mutua} y continuaremos
+    discutiendo las partes que protegeremos de los fallos de la
+    concurrencia en la capa de almacenamiento y en la implementación
+    del diseño. 
+    
     \subsubsection{Capa de Almacenamiento}
     
-    En ella se encuentran toda las estructuras que guardan la
-    información relativa a los clientes. Aquí se establece la manera
-    es que se crean y eliminan dichas estructuras.
+    Por último en esta capa se encuentran toda las estructuras que
+    guardan la información relativa a los clientes. Aquí se establece
+    la manera es que se crean y eliminan dichas estructuras.
+
+    Es primordial que guardemos a cada cliente que haya establecido
+    conexión con el servidor y se haya identificado apropiadamente.
+
+    Un primer acercamiento a esta necesidad nos deja en claro que cada
+    cliente tiene datos que necesitamos mantener accesibles: la
+    identificación de un cliente para poder enviar información
+    mediante la conexión que establecimos con él; un identificador
+    conocido por los demás clientes conectados; y, siguiendo el
+    protocolo, su estado en el servidor (ACTIVE, BUSY, AWAY).
+
+    Se tienen que almacenar los clientes en una estructura que nos
+    permita agregar a cuántos usuarios decidan conectarse al servidor
+    y eliminarlos cuando se desconecten. Además, en el protocolo se
+    especifica la posibilidad de crear salas privadas, dónde solo
+    algunos usuarios, del total de conectados, pueden enviar mensajes
+    que solo recibirán ellos. Además pueden existir múltiples salas en
+    el servidor. Por ello también se contempla la creación de una
+    estructura que guarde salas (dónde sobra decir que pueden agregar
+    nuevas salas y eliminarlas cuando dejen de tener usuarios) dónde
+    cada sala es, a su vez, una estructura que guarda usuarios dentro
+    de la y aquellos invitados a estar dentro de ella.
+
+    Visto de forma global, podemos crear una estructura que almacena a
+    los clientes de todo el servidor y las salas que en él se crearon
+    cada uno con sus respectivos clientes.
+
+    Sin dejar a un lado que debemos proteger a toda esta estructura
+    global de las múltiples modificaciones que pueden resultar de la
+    concurrencia. Discutiremos de forma concreta qué hacemos para
+    lograr este objetivo en los detalles de la implementación. 
 
     \begin{figure}[htbp]
 		\centering
@@ -249,21 +319,6 @@
 		\caption{Diagrama de la división del servidor.}
 		\label{fig:div_serv}
 	\end{figure}
-
-    \subsection{Diseño del Cliente}
-
-    Como advertimos en el análisis, la división del cliente resulta
-    fácil hacerla en tres partes.
-
-    En el desarrollo de software existe el patrón de diseño
-    modelo-vista-controlador, pensado para separar la información que
-    maneja el sistema del cómo se le presenta al usuario y cómo
-    interactuan. El \textbf{Modelo} es la información que maneja el
-    sistema. La \textbf{Vista} es la manera en que se presenta la
-    información al usuario. Por su parte el \textbf{Controlador} es la
-    forma en que interactuan la \textit{vista} y el
-    \textit{modelo}. \cite{Becerril}.
-
     
 	\section{Implementación}
 
