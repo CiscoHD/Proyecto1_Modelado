@@ -36,16 +36,25 @@
 				\begin{onecolabstract}
 
                   Se describe el diseño e implementación de una
-                  aplicación de mensajería en el lenguaje de
-                  programación C. El proyecto se estructura con la
-                  arquitectura cliente-servidor. Hace uso del
+                  aplicación de mensajería. El proyecto se estructura
+                  con la arquitectura cliente-servidor. Hace uso del
                   protocolo TCP/IP, La comunicación entre el cliente y
                   el servidor se da mediante sockets y el intercambio
                   de datos con mensajes en formato JSON. Se hace uso
                   de la programación concurrente, mediante hilos de
                   ejecución, para atender la interacción que se puede
                   dar entre el servidor y los múltiples clientes
-                  conectados simultáneamente a él.
+                  conectados simultáneamente a él. El servidor,
+                  escrito en el lenguaje de programación C, utiliza
+                  las bibliotecas cJSON y GLib para extender las
+                  funcionalidades nativas del mismo. El resultado se
+                  fue la implementación de un servidor capaz de
+                  soportar la carga de atender múltiples conexiones de
+                  manera concurrente y servir a las peticiones
+                  requeridas, siguiendo la especificación del
+                  protocolo de comunicación, mientras asegura la
+                  integridad de la información global de todos los
+                  usuarios.
 
 				\end{onecolabstract}
 			\end{tcolorbox}}
@@ -59,17 +68,27 @@
 % --- Cuerpo del reporte ---
 	
 	\section{Introducción}
-   
-    El objetivo principal del proyecto es crear un chat donde
-    múltiples usuarios puedan enviar y recibir mensajes privados, en
-    salas particulares o a todos los usuarios conectados. Por ende,
-    debe existir un 'agente' en común que sepa manejar la información
-    compartida entre aquellos que se quieren comunicar.
 
-    Es de vital importancia que la comunicación sea fiable, es decir,
-    que no exista interferencia entre las acciones de los usuarios
-    mientras se mantiene la consistencia de la información global que
-    se les proporciona.
+    En los sistemas orientados a la mensajería en tiempo real, uno de
+    los desafíos fundamentales radica en coordinar de forma efectiva
+    el intercambio de información entre múltiples participantes de
+    manera simultánea. Cuando varios usuarios intentan interactuar
+    mediante mensajes privados, salas particulares o difusiones
+    globales, es necesario el manejo rápido de las comuninaciones, la
+    sincronización y la consistencia de los datos. Sin un mecanismo
+    central de gestión, las acciones de un usuario podrían interferir
+    con las de los demás o derivar en pérdidas de información.
+
+    El objetivo principal de este proyecto es diseñar e implementar un
+    sistema de chat funcional que atienda estas necesidades mediante
+    la un agente central que sirva de intermediario. El alcance del
+    proyecto está delimitado a un escenario de escala relativamente
+    pequeña o acotada; sin embargo, el enfoque no se limita a resolver
+    el flujo básico de mensajes, sino que busca garantizar un nivel
+    alto de robustez. Se prioriza que la comunicación sea fiable, de
+    modo que el sistema responda adecuadamente ante desconexiones
+    inesperadas, mantenga la integridad de la información global y
+    minimice los tiempos de espera del cliente. 
     
 	\section{Modelado}
 
@@ -224,6 +243,13 @@
     analizadas, en 'capas'. La Figura \ref{fig:div_serv} ofrece una
     representación visual de dicha división.
 
+    \begin{figure}[htbp]
+		\centering
+        \includesvg[width=0.5\textwidth]{img/div_serv.svg}
+		\caption{Diagrama de la división del servidor.}
+		\label{fig:div_serv}
+	\end{figure}
+
     \subsubsection{Capa de Comunicación}
 
     Se encarga de todo lo relativo a la conexión y comunicación con
@@ -313,20 +339,108 @@
     concurrencia. Discutiremos de forma concreta qué hacemos para
     lograr este objetivo en los detalles de la implementación. 
 
+	\section{Implementación}
+
+    Se opta por el lenguaje de programación C para implementar el
+    servidor ya que este, a pesar de las pocas facilidades que ofrece
+    al programador, resulta sumamente enriquecedor para entender
+    conceptos fundamentales como el manejo de memoria dinamica.
+
+    Sin embargo el objetivo no es reinventar la rueda. Por este motivo
+    también se usan tecnologías y bibliotecas de terceros que ayudan
+    enormemente al desarrollo de un proyecto de esta magnitud.
+
+    Empezando por el sistema de contrucción que ayuda a mantener
+    centralizado todo lo relativo a la compilación, manejo de
+    dependencias y organización general del proyecto. En el caso de la
+    implementación presentada se usa el sistama de contrucción:
+    \textit{Meson}, el cual maneja todo lo necesario para la
+    instalación de las dependencias necesarias asi como de la
+    compilación del proyecto entero. Resulta bastante intuitivo una
+    vez que se explora con cierto detalle las funcionalidades básicas
+    que posee.
+
+    Hoy en un día, usar un manejador de versiones para llevar el
+    progreso de cualquier proyecto, es un estándar. Con diferencia el
+    más popular es \textbf{git} y es el que se usa para llevar un
+    control de los cambios y modificaciones en el desarrollo del
+    sistema.
+
+    Las bibliotecas usadas para el servidor son \textbf{GLib} y
+    \textbf{cJSON}. La primera implementa y extiende muchas de la
+    funcionalidades de la biblioteca estándar de C, en particular se
+    usa la implemetanción de \textit{GLib} de diccionarios
+    (GHashTable) para cumplir con el diseño de la \textit{Capa de
+      Almacenamiento} del servidor que se modela en la Figura
+    \ref{fig:estruct_serv}
+
     \begin{figure}[htbp]
 		\centering
-        \includesvg[width=0.5\textwidth]{img/div_serv.svg}
-		\caption{Diagrama de la división del servidor.}
-		\label{fig:div_serv}
+        \includesvg[width=0.5\textwidth]{img/estruct_serv.svg}
+		\caption{Diagrama de las estructuras del servidor siguiendo el diseño propuesto.}
+		\label{fig:estruct_serv}
 	\end{figure}
+
+    El diseño concurrente se implementa usando los hilos de ejecución
+    propios de la biblioteca \textit{GLib}, los mismos se encunetran
+    en el punto de entrada del servidor y se crea uno nuevo al
+    establecer la conexión con un cliente. Para mantener la consistencia de
+    la información almacenada se implementó la exclusión mutua en la
+    estructura \textit{ContextoServidor}, haciendo uso de la
+    estructura \textit{GMutex}.
+
+    Para establecer conexiones y cumplir con el manejo correcto del
+    protocolo de comunicación, siguiendo el diseño de la \textit{Capa
+      de Comunicación}, se usa la API de POSIX para sockets en C, que
+    proveen de todo lo necesario para establecer conexiones en redes
+    locales y comunicarse haciendo uso del protocolo TCP/IP, ideal
+    para el tipo de sistema que realizamos.
+
+    Un detalle de implemanteación es que debido a lo largo y
+    complicado que puede ser el codigo necesario para llevar a cabo
+    las conexiones haciendo uso de sockets se optó por envolverla en
+    un solo componente, \textit{$socket_util$}, que establece las
+    funciones para inciar conexiones, esperar un conexión y enviar
+    información a traves de una.
     
-	\section{Implementación}
+    Se crea además un componente, \textit{protocolo}, que define
+    enumeraciones y mapeos a cadenas para poder identificar
+    rápidamente los tipos de mensajes, operaciones, resultados y
+    estados que se pueden enviar en un JSON. A su vez, usando los
+    patrones de diseño \textbf{DTO} (Data Transfer Object) y
+    \textit{Factory} se crea una estructura \textit{Campos} que se
+    pasa como una \textbf{Literal Compuesta} (Compound Literals) en C
+    a la fución \textit{$fabrica_respuesta$} que usa la biblioteca
+    \textit{cJSON} para traducir y empaquetar la información necesaria
+    en la comunicación.
+
+    En la \textit{Capa de Operaciones}, tenemos a los componentes
+    \textit{distribuidor} y \textit{manejador} que se encargar,
+    dependiendo el tipo de mensaje, de realizar las peticiones
+    necesarias y enviar las notificaciones correspondientes en cada
+    caso.
 
     \section{Conclusión}
 
-	\appendix
+    Se logró abstraer con éxito la complejidad del desarrollo de un
+    servidro en C mediante el uso de tipos abstractos de datos,
+    patrones de diseño y la biblioteca GLib, alcanzando un servidor de
+    chat multihilo estable, capaz de gestionar múltiples salas y
+    usuarios de forma concurrente.
 
-	\section{Primer apéndice}
+    Fue un gran proyecto que ante todo marca un antes y un después en
+    lo que creí que me tomaría años aprender. A la vez resulta ser uno
+    de los que más satisfaccción me deja a pesar de las complicaciones
+    y contratiempos que hicieron que no pudiera terminarlo como me
+    gustaría. 
+
+    Fue abrumador balancear el análisis y el diseño de cosas que no
+    terminaba de entender por qué eran necesarias o cómo
+    funcionaban. Y, una vez puesto en práctica, los erores referentes
+    a las bibliotecas desconocidas resultaban abrumadores.
+
+    Me llevo mucha experiencia y ganas de continuar haciendo proyecto
+    que no me veía haciendo antes de entrar a la Licenciatura.
 
     \printbibliography[heading=bibintoc]
 	
